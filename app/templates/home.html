@@ -1,0 +1,40 @@
+
+{% block body %}
+    <title>mingles</title>
+
+    <script>
+
+    var http = require("http");
+    setInterval(function() {
+    http.get("http://mingles.herokuapp.com");
+    }, 300000); // every 5 minutes (300000)
+
+    </script>
+<center>
+    <style>
+
+    div {
+        width: 50%;
+        height: 40%;
+        padding: 1px;
+
+        margin-top: 10%;
+    }
+
+    lah {
+        font-family: helvetica;
+        font-size: 30px;
+        color: #717171;
+
+    }
+
+
+    </style>
+
+
+    <div>
+        <embed src="../static/model_loader.html" height=100% width=100%>
+	</div>
+    <lah><a href="/blog">coming soon...</a></lah>
+    </center>
+{% endblock %}

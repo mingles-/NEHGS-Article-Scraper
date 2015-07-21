@@ -1,0 +1,31 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+</head>
+<div class="container">
+    <body style="font-family:MyriadPro;">
+
+    {% for d in dictionary %}
+<center>
+        <h2>{{ d['title'] | safe}}</h2>
+{#        <h3>State: {{ d['country'] }}</h3>#}
+        <h4>
+            {% if d['author']| safe %}
+
+            {{"By " + d['author'] | safe}}
+
+            {% endif %}
+
+        </h4>
+{#        <h3>Published: {{ d['published'] }}</h3>#}
+</center>
+        {{ d['content'] |safe }}
+
+    {% endfor %}
+
+  </body>
+
+</div>
