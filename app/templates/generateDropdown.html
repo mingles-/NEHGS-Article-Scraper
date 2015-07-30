@@ -1,0 +1,64 @@
+{% block body %}
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NEHGS Articles - Print</title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+</head>
+<style>
+blockquote, q{
+    margin:0;
+    padding:0;
+    border:0;
+    outline:0;
+    font-size:100%;
+    vertical-align:baseline;
+    background:transparent;
+    quotes:none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content:'';
+    content:none;
+}
+sup {font-size:xx-small; vertical-align:super;}
+</style>
+
+<body>
+    <div class="container">
+    <h3><a href="#"></a>Articles Print</h3>
+    <div class="panel-group"  id="accordion">
+    {% for d in dictionary %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#{{ loop.index }}">
+                        {{ d['title'] }}
+                        {% if d['author'] %}
+                             by <strong>{{ d['author'] }}</strong>
+                        {% endif %}
+                    </a>
+                </h2>
+            </div>
+            <div id='{{ loop.index }}'  class="panel-collapse collapse">
+                <div class="panel-body">
+                    <div class="col-md-11">
+                        <div class="row">
+                            {% if d['published'] %}
+                                <strong>Published {{ d['published'] }}</strong>
+                            {% endif %} <br>
+                        </div>
+                        <div class="row">
+                            {{ d['content']|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+</body>
+{% endblock %}

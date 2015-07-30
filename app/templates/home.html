@@ -1,40 +1,10 @@
-
 {% block body %}
-    <title>mingles</title>
-
-    <script>
-
-    var http = require("http");
-    setInterval(function() {
-    http.get("http://mingles.herokuapp.com");
-    }, 300000); // every 5 minutes (300000)
-
-    </script>
-<center>
-    <style>
-
-    div {
-        width: 50%;
-        height: 40%;
-        padding: 1px;
-
-        margin-top: 10%;
-    }
-
-    lah {
-        font-family: helvetica;
-        font-size: 30px;
-        color: #717171;
-
-    }
-
-
-    </style>
-
-
-    <div>
-        <embed src="../static/model_loader.html" height=100% width=100%>
-	</div>
-    <lah><a href="/blog">coming soon...</a></lah>
+<div class="container">
+    <center>
+        <h2><a href="/getlinks">Activate Web Scraper</a></h2>
+        <p>May take 30-45 Mins. Check Terminal Output for Progress</p>
+        <p>finished result stored in /data.txt.</p>
+        <h2><a href="/print">Print retrieved JSON</a></h2>
     </center>
+</div>
 {% endblock %}

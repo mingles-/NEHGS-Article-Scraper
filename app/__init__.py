@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
-from os import environ
 from flask_bootstrap import Bootstrap
-from collections import OrderedDict
 from flask import (
     Flask,
     abort,
@@ -13,25 +10,40 @@ from flask import (
     url_for,
 
 )
+
+from signal import signal, SIGPIPE, SIG_DFL
+signal(SIGPIPE, SIG_DFL)
+
 from lxml import html
 import lxml.html
 import requests
-import string
-import pdfkit
 import re
 import json
 
 app = Flask(__name__)
 Bootstrap(app)
-
 app.config['DEBUG'] = True
 
+@app.route('/')
+def home():
 
-@app.route('/getLinks')
+    return render_template('home.html')
+
+
+@app.route('/print')
+def print_ny():
+    articles = []
+    with open('data.txt') as json_data:
+        full = json.load(json_data)
+    json_data.close()
+
+    for i in range(0, len(full)):
+
+        articles.append(full[i])
+    return render_template('generateDropdown.html', dictionary=articles)
+
+@app.route('/getlinks')
 def getLinks():
-
-    with open('articles.txt', 'w') as outfile:
-        json.dump(["hello world"], outfile)
 
     dictionary = []
     content = ""
@@ -43,14 +55,9 @@ def getLinks():
                  'New York', 'Rhode Island', 'Vermont', '']
     links = tree.xpath('//a[@target=""]//@href')
     titles = tree.xpath('//a[@target=""]/text()')
-
-    # print 'countries: ', countries
-    # print 'Links: ', links
-    # print 'Titles: ', titles
-
-    # dictionary = dict(zip(titles, links))
     country = 11
-    for x in xrange(0, 2):#len(links)):
+
+    for x in xrange(0, len(links)):
 
         author = ""
         content = ""
@@ -78,28 +85,16 @@ def getLinks():
         elif titles[x] == "A Genealogical Guide to Essential Printed Resources for Vermont":
             country = 10
 
-        # print country
+        # minor fix with erroneous link
+        if titles[x] == "Early Vital Records of New York State: the Work of Fred Q. Bowman":
+            links[x] = "/web/20140612100255/http://www.americanancestors.org/early-vital-records-of-new-york-fred-q.-bowman/"
 
-
-
-        # if titles[x] == "Finding Clues to Immigrant Origins":
 
         page = requests.get('http://web.archive.org' + links[x])
         tree = html.fromstring(page.text)
         author = tree.xpath('//h4/text()')
         published = tree.xpath('//div[@class="PubDate"]//text()')
         contentTree = tree.xpath('//content/*')
-
-        # test = contentTree
-        # for element, attribute, link, pos in test.findall():
-        #
-        #     new_src = link.replace('foo', 'bar') # or element.get('src').replace('foo', 'bar')
-        #     element.set('src', new_src)
-        # print lxml.test.tostring(html)
-
-        #link = tree.xpath('//a[@href="/web/"]/*')
-
-        # print link
 
         if len(published) == 0:
             published = ""
@@ -112,30 +107,10 @@ def getLinks():
             author = author[0]
 
         for c in contentTree:
-            link = "<a href=" + chr(34) + "/web/"
-            newlink = "<a href=" + chr(34) + "http://web.archive.org/web/"
             content = content + lxml.html.tostring(c)
-            # if not "http://www.americanancestors.org" in content:
-            # content = content.replace(link, newlink)
-            content = re.sub('/web/.+?/http', 'http', content)
-            content = re.sub('http://www.americanancestors.org',
-                             'http://web.archive.org/http://www.americanancestors.org', content)
-            # else:
-            #     content = re.sub('<[^>]+>', '', content)
-
-
-        # link = "<a href=" + chr(34) + "/web/"
-        # newlink = "<a href=" + chr(34) + "http://web.archive.org/web/"
-        #
-        # content.replace(link, newlink)
-        # print content
-        # if link in content:
-        #     content.replace(link, newlink)
-
-        # print content
-
-        # print lxml.html.tostring(content[0])
-
+        content = re.sub('/web/.+?/http', 'http', content)
+        content = re.sub('http://www.americanancestors.org',
+                         'http://web.archive.org/http://www.americanancestors.org', content)
 
         dictionary.append({
             'title': titles[x],
@@ -143,27 +118,14 @@ def getLinks():
             'link': links[x],
             'author': author.decode('utf-8'),
             'published': published.decode('utf-8'),
-            'content': "",#content.decode('utf-8'),
+            'content': content.decode('utf-8'),
             'topic': "",
         })
-        # print titles[x]
+        print titles[x]
 
     getTopics(dictionary)
-    # import io
-    # with io.open('data.txt', 'w', encoding='utf-8') as f:
-    #     f.write(unicode(json.dumps(dictionary, ensure_ascii=False)))
-    # print unicode(json.dumps(dictionary, ensure_ascii=False))
-    # test = [1,2,3]
-    #     with open('articles.txt', 'a') as outfile:
-    #         json.dump(dictionary, outfile, indent=2)
-        # rendered_template = render_template('vermont.html', dictionary=dictionary)
-        # rendered_template = rendered_template
-        # dictionary = []
-        # pdf = pdfkit.from_string(rendered_template,  "pdfs/" + titles[x] + " - " + author + '.pdf')
 
-
-
-    return render_template('vermont.html', dictionary=dictionary)
+    return render_template('getlnfo.html', dictionary=dictionary)
 
 
 def getTopics(dictionary):
@@ -251,19 +213,17 @@ def getTopics(dictionary):
                 if titles_raw[x] == (d['title']):
                     d['topic'] = topic_list[topic]
 
-        # print topic_list[topic]
         topics_raw.append(topic_list[topic])
 
     # find articles not in countries page
     for i in range(0, len(titles_raw)):
-        # print titles_raw[i]
         if titles_raw[i] not in namelist:
             titles.append(titles_raw[i])
             links.append(links_raw[i])
             topics.append(topics_raw[i])
 
 
-    for x in range(0, 2):#len(titles)):
+    for x in range(0, len(titles)):
         author = ""
         content = ""
         print titles[x]
@@ -275,8 +235,6 @@ def getTopics(dictionary):
         published = tree.xpath('//div[@class="PubDate"]//text()')
         contentTree = tree.xpath('//content/*')
 
-        # if float(x) % 50.0 == 0.0:
-            # print "-------------- x == " + str(x)
         if len(published) == 0:
             published = ""
         else:
@@ -288,14 +246,10 @@ def getTopics(dictionary):
             author = author[0]
 
         for c in contentTree:
-            link = "<a href=" + chr(34) + "/web/"
-            newlink = "<a href=" + chr(34) + "http://web.archive.org/web/"
             content = content + lxml.html.tostring(c)
-            # if not "http://www.americanancestors.org" in content:
-            # content = content.replace(link, newlink)
-            content = re.sub('/web/.+?/http', 'http', content)
-            content = re.sub('http://www.americanancestors.org',
-                             'http://web.archive.org/http://www.americanancestors.org', content)
+        content = re.sub('/web/.+?/http', 'http', content)
+        content = re.sub('http://www.americanancestors.org',
+                         'http://web.archive.org/http://www.americanancestors.org', content)
 
         dictionary.append({
             'title': titles[x],
@@ -303,16 +257,14 @@ def getTopics(dictionary):
             'link': links[x],
             'author': author.decode('utf-8'),
             'published': published.decode('utf-8'),
-            'content': "",#content.decode('utf-8'),
+            'content': content.decode('utf-8'),
             'topic': topics[x],
         })
+        content = ""
 
-    print json.dumps(dictionary, ensure_ascii=False)
-    # outfile = open('data.txt', 'w')
-    # outfile.write(json.dumps(dictionary, ensure_ascii=False))
-    # outfile.close()
-
-
+    outfile = open('data.txt', 'w')
+    outfile.write(json.dumps(dictionary))
+    outfile.close()
 
 if __name__ == '__main__':
     app.run()

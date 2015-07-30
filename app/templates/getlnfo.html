@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<head>
+    <title>Get Info</title>
+</head>
+{% block body %}
+<div class="container">
+    <body>
+        {% for d in dictionary %}
+        <center>
+            <h2>{{ d['title'] | safe }}</h2>
+            <h4>
+                {% if d['author']| safe %}
+                    {{"By " + d['author'] | safe }}
+                {% endif %}
+            </h4>
+        </center>
+            {{ d['content'] | safe }}
+        {% endfor %}
+    </body>
+</div>
+{% endblock %}
